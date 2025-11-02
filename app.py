@@ -232,7 +232,7 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     t_area = st.number_input("Area [m²]", min_value=10, max_value=500, value=50)
-    df = pd.read_csv(r"C:\Users\aleks\ml-projects\apartment-price-predictor\cities_data\otodom_apartments_demo.csv", sep=";", encoding="utf-8-sig")
+    df = pd.read_csv("/cities_data/otodom_apartments_demo.csv", sep=";", encoding="utf-8-sig")
     t_price_per_m2 = st.number_input("Price per m²", min_value=0.0, value=float(df["price_per_m2"].mean()))
 
 with col2:
