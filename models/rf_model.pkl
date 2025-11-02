@@ -1,0 +1,146 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "d44c5a7e-ac9c-4903-9af7-c154654208c7",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Model: Random Forest Regressor\n",
+      "📉 MAE: 4675.08\n",
+      "📈 R²: 0.9974\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "['encoders.pkl']"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import LabelEncoder\n",
+    "from sklearn.ensemble import RandomForestRegressor\n",
+    "from sklearn.metrics import mean_absolute_error, r2_score\n",
+    "\n",
+    "# ---------------------------\n",
+    "# 1️⃣ Wczytanie danych\n",
+    "# ---------------------------\n",
+    "df = pd.read_csv(r\"C:\\Users\\aleks\\ml-projects\\apartment-price-predictor\\cities_data\\otodom_apartments_demo.csv\", sep=\";\", encoding=\"utf-8-sig\")\n",
+    "df = df[df[\"city\"] != \"nieznane\"].dropna()\n",
+    "\n",
+    "# ---------------------------\n",
+    "# 2️⃣ Przygotowanie danych\n",
+    "# ---------------------------\n",
+    "X = df.drop(columns=[\"price\",\"region\",\"localization\",\"title\"])\n",
+    "y = df[\"price\"]\n",
+    "\n",
+    "# Kodowanie kolumn kategorycznych\n",
+    "categorical_cols = X.select_dtypes(include=[\"object\"]).columns\n",
+    "encoders = {}\n",
+    "\n",
+    "for col in categorical_cols:\n",
+    "    le = LabelEncoder()\n",
+    "    X[col] = le.fit_transform(X[col])\n",
+    "    encoders[col] = le\n",
+    "\n",
+    "# ---------------------------\n",
+    "# 3️⃣ Podział danych na train/test\n",
+    "# ---------------------------\n",
+    "X_train, X_test, y_train, y_test = train_test_split(\n",
+    "    X, y, test_size=0.2, random_state=42\n",
+    ")\n",
+    "\n",
+    "# ---------------------------\n",
+    "# 4️⃣ Trening modelu\n",
+    "# ---------------------------\n",
+    "model = RandomForestRegressor(\n",
+    "    n_estimators=300,     # liczba drzew\n",
+    "    max_depth=15,         # ograniczenie głębokości\n",
+    "    min_samples_split=4,  # aby uniknąć przeuczenia\n",
+    "    random_state=42,\n",
+    "    n_jobs=-1             # użyj wszystkich rdzeni CPU\n",
+    ")\n",
+    "\n",
+    "model.fit(X_train, y_train)\n",
+    "\n",
+    "# ---------------------------\n",
+    "# 5️⃣ Ewaluacja\n",
+    "# ---------------------------\n",
+    "y_pred = model.predict(X_test)\n",
+    "\n",
+    "mae = mean_absolute_error(y_test, y_pred)\n",
+    "r2 = r2_score(y_test, y_pred)\n",
+    "\n",
+    "print(\"✅ Model: Random Forest Regressor\")\n",
+    "print(f\"📉 MAE: {mae:.2f}\")\n",
+    "print(f\"📈 R²: {r2:.4f}\")\n",
+    "\n",
+    "import joblib\n",
+    "joblib.dump(model, \"rf_model.pkl\")\n",
+    "joblib.dump(encoders, \"encoders.pkl\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "1ae6e467-4e70-4c48-bd8c-6788f1b0829f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['price_per_m2', 'type', 'rooms', 'area', 'floor', 'district',\n",
+       "       'city'], dtype=object)"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model.feature_names_in_"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5407c527-5408-4a12-96c7-34a95e09a886",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
